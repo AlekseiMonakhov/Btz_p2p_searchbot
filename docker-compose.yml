@@ -1,0 +1,39 @@
+version: "3.1"
+
+services:
+  db:
+    container_name: database_bot
+    image: sameersbn/postgresql:latest
+    env_file:
+      - ".env"
+    environment:
+      DB_NAME: $BASE
+      PG_PASSWORD: $PASS
+    restart: always
+    networks:
+      - botnet
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres:/var/lib/postgresql
+      - /etc/localtime:/etc/localtime:ro
+
+  bot:
+    container_name: bot
+    build:
+      context: .
+    command: python app.py
+    networks:
+      - botnet
+    restart: always
+    env_file:
+      - ".env"
+    volumes:
+      - .:/src
+    depends_on:
+      - db
+
+networks:
+  botnet:
+    external:
+        name: botnet
